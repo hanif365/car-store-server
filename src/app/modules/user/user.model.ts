@@ -24,9 +24,9 @@ const userSchema = new Schema<TUser>(
       enum: ['user', 'admin'],
       default: 'user',
     },
-    isBlocked: {
+    isActive: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   {

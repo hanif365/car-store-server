@@ -1,18 +1,30 @@
-import { Model } from "mongoose";
+import { Model } from 'mongoose';
 
 export type TUserRole = 'user' | 'admin';
 
 export type TUser = {
+  _id?: string;
   name: string;
   email: string;
   password: string;
   role: TUserRole;
-  isBlocked: boolean;
+  isActive: boolean;
+  passwordChangedAt?: Date;
 };
 
-export type TUserModel = Model<TUser> & {
-    isPasswordMatched(
-      givenPassword: string,
-      savedPassword: string,
-    ): Promise<boolean>;
-  };
+export type TLoginUser = {
+  email: string;
+  password: string;
+};
+
+export type TChangePassword = {
+  currentPassword: string;
+  newPassword: string;
+};
+
+export interface TUserModel extends Model<TUser> {
+  isPasswordMatched(
+    givenPassword: string,
+    savedPassword: string,
+  ): Promise<boolean>;
+}

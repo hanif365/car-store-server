@@ -17,7 +17,7 @@ export type TLoginResponse = {
 };
 
 export type TRegisterResponse = {
-  _id: Types.ObjectId;
+  _id: Types.ObjectId | string;
   name: string;
   email: string;
   //   role: string;

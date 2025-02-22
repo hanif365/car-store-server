@@ -43,8 +43,8 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
   }
 
   // Check if user is blocked
-  if (user.isBlocked) {
-    throw new AppError(StatusCodes.FORBIDDEN, 'Your account has been blocked');
+  if (!user.isActive) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'Your account has been deactivated');
   }
 
   // Check password is correct or not
