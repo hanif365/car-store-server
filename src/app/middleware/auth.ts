@@ -24,7 +24,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
     // Check user exists or not
     const user = await User.findById(decoded.userId);
     
-    console.log(user);
+    // console.log(user);
 
     if (!user) {
       throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
