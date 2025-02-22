@@ -57,7 +57,7 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid credentials');
   }
 
-  console.log(user);
+//   console.log(user);
 
   const jwtPayload = {
     userId: user._id,
