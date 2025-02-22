@@ -1,4 +1,5 @@
 import { Router } from "express";
+import authRoutes from "../modules/auth/auth.route";
 
 const router = Router();
 
@@ -7,7 +8,12 @@ export interface Routes {
   route: Router;
 }
 
-const moduleRoutes: Routes[] = [];
+const moduleRoutes: Routes[] = [
+  {
+    path: '/auth',
+    route: authRoutes,
+  },
+];
 
 // register all module routes dynamically
 moduleRoutes.forEach(({ path, route }) => router.use(path, route));

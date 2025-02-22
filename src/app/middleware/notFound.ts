@@ -8,7 +8,7 @@ const notFound = (req: Request, res: Response) => {
     success: false,
     message: "Not Found",
     statusCode: StatusCodes.NOT_FOUND,
-    error: [{ details: [{ path: req.originalUrl, message: "API not found" }] }],
+    error: [{ details: [{ path: req.originalUrl, message: "API not found!" }] }],
     stack: config.env === "development" ? new Error().stack : null,
   });
 };
