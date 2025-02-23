@@ -35,6 +35,18 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+  const { accessToken } = await AuthService.refreshToken(refreshToken);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,       
+    success: true,
+    message: 'Token refreshed successfully',
+    data: { accessToken },
+  });
+});
+
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
   await AuthService.logoutUser();
 
@@ -59,5 +71,6 @@ const logoutUser = catchAsync(async (req: Request, res: Response) => {
 export const AuthController = {
   registerUser,
   loginUser,
+  refreshToken,
   logoutUser,
 };

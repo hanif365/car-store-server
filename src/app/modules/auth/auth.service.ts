@@ -9,7 +9,7 @@ import {
   TRegisterUser,
   TLogoutResponse,
 } from './auth.interface';
-import { createToken } from './auth.utils';
+import { createToken, verifyToken } from './auth.utils';
 
 const registerUser = async (
   payload: TRegisterUser,
@@ -42,7 +42,7 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
     throw new AppError(StatusCodes.NOT_FOUND, 'User does not exist');
   }
 
-  // Check if user is blocked
+  // Check if user is deactivated
   if (!user.isActive) {
     throw new AppError(StatusCodes.FORBIDDEN, 'Your account has been deactivated');
   }
@@ -84,6 +84,36 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
   };
 };
 
+  const refreshToken = async (refreshToken: string) => {
+  const decoded = verifyToken(refreshToken, config.jwt_refresh_secret as string);
+  const user = await User.findById(decoded.userId);
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+    // Check if user is deactivated
+    if (!user.isActive) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'Your account has been deactivated');
+  }
+  
+
+  const jwtPayload = {
+    userId: user._id,
+    role: user.role,
+    // email: user.email,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  console.log("sending new access token", accessToken);
+
+  return { accessToken }; 
+};  
+
 const logoutUser = async (): Promise<TLogoutResponse> => {
   return {
     message: 'Logout successful',
@@ -93,5 +123,6 @@ const logoutUser = async (): Promise<TLogoutResponse> => {
 export const AuthService = {
   registerUser,
   loginUser,
+  refreshToken,
   logoutUser,
 };

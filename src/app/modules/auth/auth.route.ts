@@ -19,6 +19,13 @@ router.post(
   AuthController.loginUser,
 );
 
+// Public routes to refresh token
+router.post(
+  '/refresh-token',
+  validateRequest(AuthValidation.refreshTokenValidationSchema),
+  AuthController.refreshToken,
+);
+
 // Public routes to logout user
 router.post('/logout', AuthController.logoutUser);
 

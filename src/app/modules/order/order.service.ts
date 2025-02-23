@@ -72,7 +72,7 @@ const createOrder = async (
 
     const payment = await orderUtils.makePaymentAsync(shurjopayPayload);
 
-    console.log('payment', payment);
+    // console.log('payment', payment);
 
     if (payment?.transactionStatus) {
       await order[0].updateOne({
@@ -101,10 +101,10 @@ const createOrder = async (
 };
 
 const verifyPayment = async (order_id: string) => {
-  console.log('order_id', order_id);
+  // console.log('order_id', order_id);
   const verifiedPayment = await orderUtils.verifyPaymentAsync(order_id);
 
-  console.log('verifiedPayment', verifiedPayment);
+  // console.log('verifiedPayment', verifiedPayment);
 
   if (verifiedPayment.length) {
     await Order.findOneAndUpdate(
@@ -208,7 +208,7 @@ const getSingleOrder = async (id: string, user: JwtPayload) => {
 const updateOrderStatus = async (
   id: string,
   payload: {
-    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered';
+    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
     estimatedDeliveryDate?: Date;
   },
 ) => {
