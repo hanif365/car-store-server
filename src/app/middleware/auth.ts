@@ -23,18 +23,18 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     // Check user exists or not
     const user = await User.findById(decoded.userId);
-    
-    console.log(user);
+
+    // console.log('user', user);
 
     if (!user) {
       throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
     }
 
     // Check user is blocked or not
-    if (user.isBlocked) {
+    if (!user.isActive) {
       throw new AppError(
         StatusCodes.FORBIDDEN,
-        'Your account has been blocked',
+        'Your account has been deactivated',
       );
     }
 

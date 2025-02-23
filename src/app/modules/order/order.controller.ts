@@ -5,12 +5,23 @@ import { OrderService } from './order.service';
 import { StatusCodes } from 'http-status-codes';
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const result = await OrderService.createOrder(req.body, req.user!);
+  const result = await OrderService.createOrder(req.body, req.user!, req.ip!);
 
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
     success: true,
     message: 'Order placed successfully',
+    data: result,
+  });
+});
+
+const verifyPayment = catchAsync(async (req, res) => {
+  const result = await OrderService.verifyPayment(req.query.order_id as string);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    success: true,
+    message: 'Order verified successfully',
     data: result,
   });
 });
@@ -61,8 +72,9 @@ const updateOrderStatus = catchAsync(async (req: Request, res: Response) => {
 
 export const OrderController = {
   createOrder,
+  verifyPayment,
   getAllOrders,
   getMyOrders,
   getSingleOrder,
   updateOrderStatus,
-}; 
+};

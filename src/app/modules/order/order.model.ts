@@ -23,7 +23,7 @@ const orderSchema = new Schema<TOrder>(
     },
     status: {
       type: String,
-      enum: ['Pending', 'Processing', 'Shipped', 'Delivered'],
+      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
       default: 'Pending',
     },
     estimatedDeliveryDate: {
@@ -31,20 +31,28 @@ const orderSchema = new Schema<TOrder>(
     },
     paymentStatus: {
       type: String,
-      enum: ['Pending', 'Paid'],
+      enum: ['Pending', 'Paid', 'Cancelled'],
       default: 'Pending',
     },
-    paymentMethod: {
+    // paymentMethod: {
+    //   type: String,
+    //   required: true,
+    // },
+    address: {
       type: String,
       required: true,
     },
-    address: {
+    city: {
       type: String,
       required: true,
     },
     contactNo: {
       type: String,
       required: true,
+    },
+    transaction: {
+      type: Schema.Types.Mixed,
+      default: {},
     },
   },
   {
@@ -53,4 +61,4 @@ const orderSchema = new Schema<TOrder>(
 );
 
 const Order = model<TOrder>('Order', orderSchema);
-export default Order; 
+export default Order;

@@ -14,23 +14,13 @@ router.post(
   OrderController.createOrder,
 );
 
-router.get(
-  '/my-orders',
-  auth(USER_ROLE.USER),
-  OrderController.getMyOrders,
-);
+router.get('/verify-payment', OrderController.verifyPayment);
 
-router.get(
-  '/:id',
-  auth(USER_ROLE.USER),
-  OrderController.getSingleOrder,
-);
+router.get('/my-orders', auth(USER_ROLE.USER), OrderController.getMyOrders);
 
-router.get(
-  '/',
-  auth(USER_ROLE.ADMIN),
-  OrderController.getAllOrders,
-);
+router.get('/:id', auth(USER_ROLE.USER), OrderController.getSingleOrder);
+
+router.get('/', auth(USER_ROLE.ADMIN), OrderController.getAllOrders);
 
 router.patch(
   '/:id/status',
@@ -39,4 +29,4 @@ router.patch(
   OrderController.updateOrderStatus,
 );
 
-export default router; 
+export default router;

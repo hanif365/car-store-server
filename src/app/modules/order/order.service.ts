@@ -6,12 +6,24 @@ import Product from '../product/product.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { AppError } from '../../errors/AppError';
 import { TOrder } from './order.interface';
+import User from '../user/user.model';
+import { orderUtils } from './order.utils';
 
-const createOrder = async (payload: TOrder, user: JwtPayload) => {
+const createOrder = async (
+  payload: TOrder,
+  user: JwtPayload,
+  client_ip: string,
+) => {
   // Start transaction
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
+
+    // Get user details for payment
+    const userDetails = await User.findById(user.userId);
+    if (!userDetails) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    }
 
     // Check if product exists and has enough stock
     const product = await Product.findById(payload.product);
@@ -30,12 +42,46 @@ const createOrder = async (payload: TOrder, user: JwtPayload) => {
     // Create order
     const order = await Order.create([payload], { session });
 
+    // console.log('order', order);
+
+    // console.log('payload', payload);
+
+    // console.log('user', user);
+
     // Update product stock
     await Product.findByIdAndUpdate(
       payload.product,
       { $inc: { stock: -payload.quantity } },
       { session, new: true },
     );
+
+    // Prepare payment payload with user details
+    const shurjopayPayload = {
+      amount: payload.totalPrice,
+      order_id: order[0]._id,
+      currency: 'BDT',
+      customer_name: userDetails.name,
+      customer_address: payload.address,
+      customer_email: userDetails.email,
+      customer_phone: payload.contactNo,
+      customer_city: payload.city,
+      client_ip,
+    };
+
+    // console.log('shurjopayPayload', shurjopayPayload);
+
+    const payment = await orderUtils.makePaymentAsync(shurjopayPayload);
+
+    console.log('payment', payment);
+
+    if (payment?.transactionStatus) {
+      await order[0].updateOne({
+        transaction: {
+          id: payment.sp_order_id,
+          transactionStatus: payment.transactionStatus,
+        },
+      });
+    }
 
     await session.commitTransaction();
 
@@ -45,13 +91,55 @@ const createOrder = async (payload: TOrder, user: JwtPayload) => {
       { path: 'product', select: '-__v' },
     ]);
 
-    return populatedOrder;
+    return { order: populatedOrder, payment: payment.checkout_url };
   } catch (error) {
     await session.abortTransaction();
     throw error;
   } finally {
     session.endSession();
   }
+};
+
+const verifyPayment = async (order_id: string) => {
+  console.log('order_id', order_id);
+  const verifiedPayment = await orderUtils.verifyPaymentAsync(order_id);
+
+  console.log('verifiedPayment', verifiedPayment);
+
+  if (verifiedPayment.length) {
+    await Order.findOneAndUpdate(
+      {
+        'transaction.id': order_id,
+      },
+      {
+        'transaction.bank_status': verifiedPayment[0].bank_status,
+        'transaction.sp_code': verifiedPayment[0].sp_code,
+        'transaction.sp_message': verifiedPayment[0].sp_message,
+        'transaction.transactionStatus': verifiedPayment[0].transaction_status,
+        'transaction.method': verifiedPayment[0].method,
+        'transaction.date_time': verifiedPayment[0].date_time,
+        paymentStatus:
+          verifiedPayment[0].bank_status == 'Success'
+            ? 'Paid'
+            : verifiedPayment[0].bank_status == 'Failed'
+              ? 'Pending'
+              : verifiedPayment[0].bank_status == 'Cancel'
+                ? 'Cancelled'
+                : '',
+
+        // status:
+        //   verifiedPayment[0].bank_status == "Success"
+        //     ? "Processing"
+        //     : verifiedPayment[0].bank_status == "Failed"
+        //     ? "Pending"
+        //     : verifiedPayment[0].bank_status == "Cancel"
+        //     ? "Cancelled"
+        //     : "",
+      },
+    );
+  }
+
+  return verifiedPayment;
 };
 
 const getAllOrders = async (query: Record<string, unknown>) => {
@@ -142,6 +230,7 @@ const updateOrderStatus = async (
 
 export const OrderService = {
   createOrder,
+  verifyPayment,
   getAllOrders,
   getMyOrders,
   getSingleOrder,
