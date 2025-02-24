@@ -11,6 +11,9 @@ const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     // Check authorization header exists or not
     const token = req.headers.authorization;
+
+    console.log("token from auth middleware", token);
+
     if (!token) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'Unauthorized Access');
     }

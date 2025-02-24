@@ -10,19 +10,21 @@ export type TTransaction = {
   date_time: string;
 };
 
-export type TOrder = {
-  user: Types.ObjectId;
+export type TOrderItem = {
   product: Types.ObjectId;
   quantity: number;
+};
+
+export type TOrder = {
+  user: Types.ObjectId;
+  items: TOrderItem[];
   totalPrice: number;
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   estimatedDeliveryDate?: Date;
   paymentStatus: 'Pending' | 'Paid' | 'Cancelled';
-  // paymentMethod: string;
   address: string;
   contactNo: string;
   city: string;
-
   transaction: TTransaction;
 };
 

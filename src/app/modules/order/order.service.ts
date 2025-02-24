@@ -5,59 +5,66 @@ import Order from './order.model';
 import Product from '../product/product.model';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { AppError } from '../../errors/AppError';
-import { TOrder } from './order.interface';
+import { TOrderItem } from './order.interface';
 import User from '../user/user.model';
 import { orderUtils } from './order.utils';
 
 const createOrder = async (
-  payload: TOrder,
-  user: JwtPayload,
-  client_ip: string,
+  payload: { items: TOrderItem[]; user: JwtPayload; client_ip: string; address: string; contactNo: string; city: string; },
 ) => {
-  // Start transaction
+  if (!payload.user || !payload.user.userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
+  }
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
 
     // Get user details for payment
-    const userDetails = await User.findById(user.userId);
+    const userDetails = await User.findById(payload.user.userId);
     if (!userDetails) {
       throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
     }
 
-    // Check if product exists and has enough stock
-    const product = await Product.findById(payload.product);
-    if (!product) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
-    }
+    let totalPrice = 0;
 
-    if (product.stock < payload.quantity) {
-      throw new AppError(StatusCodes.BAD_REQUEST, 'Not enough stock available');
-    }
+    // Process each item in the order
+    for (const item of payload.items) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+      }
 
-    // Calculate total price
-    payload.totalPrice = product.price * payload.quantity;
-    payload.user = user.userId;
+      if (product.stock < item.quantity) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Not enough stock available');
+      }
+
+      // Calculate total price for this item
+      totalPrice += product.price * item.quantity;
+
+      // Update product stock
+      await Product.findByIdAndUpdate(
+        item.product,
+        { $inc: { stock: -item.quantity } },
+        { session, new: true },
+      );
+    }
 
     // Create order
-    const order = await Order.create([payload], { session });
-
-    // console.log('order', order);
-
-    // console.log('payload', payload);
-
-    // console.log('user', user);
-
-    // Update product stock
-    await Product.findByIdAndUpdate(
-      payload.product,
-      { $inc: { stock: -payload.quantity } },
-      { session, new: true },
-    );
+    const order = await Order.create([{
+      user: payload.user.userId,
+      items: payload.items,
+      totalPrice,
+      address: payload.address,
+      contactNo: payload.contactNo,
+      city: payload.city,
+      paymentStatus: 'Pending',
+      status: 'Pending',
+      transaction: {},
+    }], { session });
 
     // Prepare payment payload with user details
     const shurjopayPayload = {
-      amount: payload.totalPrice,
+      amount: totalPrice,
       order_id: order[0]._id,
       currency: 'BDT',
       customer_name: userDetails.name,
@@ -65,14 +72,10 @@ const createOrder = async (
       customer_email: userDetails.email,
       customer_phone: payload.contactNo,
       customer_city: payload.city,
-      client_ip,
+      client_ip: payload.client_ip,
     };
 
-    // console.log('shurjopayPayload', shurjopayPayload);
-
     const payment = await orderUtils.makePaymentAsync(shurjopayPayload);
-
-    // console.log('payment', payment);
 
     if (payment?.transactionStatus) {
       await order[0].updateOne({
@@ -84,14 +87,7 @@ const createOrder = async (
     }
 
     await session.commitTransaction();
-
-    // Use await and specify fields to populate
-    const populatedOrder = await order[0].populate([
-      { path: 'user', select: '-__v' },
-      { path: 'product', select: '-__v' },
-    ]);
-
-    return { order: populatedOrder, payment: payment.checkout_url };
+    return payment.checkout_url;
   } catch (error) {
     await session.abortTransaction();
     throw error;

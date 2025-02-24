@@ -5,7 +5,14 @@ import { OrderService } from './order.service';
 import { StatusCodes } from 'http-status-codes';
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const result = await OrderService.createOrder(req.body, req.user!, req.ip!);
+  const result = await OrderService.createOrder({
+    items: req.body.items,
+    user: req.user!,
+    client_ip: req.ip!,
+    address: req.body.address,
+    contactNo: req.body.contactNo,
+    city: req.body.city,
+  });
 
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
