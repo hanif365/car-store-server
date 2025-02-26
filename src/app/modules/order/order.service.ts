@@ -147,7 +147,7 @@ const getAllOrders = async (query: Record<string, unknown>) => {
 
   const result = await orderQuery.modelQuery.populate([
     { path: 'user', select: '-__v' },
-    { path: 'product', select: '-__v' },
+    { path: 'items.product', select: '-__v' },
   ]);
   // .populate('user', 'name email')
   // .populate('product', 'name price');
@@ -176,7 +176,7 @@ const getMyOrders = async (
 
   const result = await orderQuery.modelQuery.populate([
     { path: 'user', select: '-__v' },
-    { path: 'product', select: '-__v' },
+    { path: 'items.product', select: '-__v' },
   ]);
   const total = await Order.countDocuments(orderQuery.modelQuery.getQuery());
 
@@ -193,7 +193,7 @@ const getMyOrders = async (
 const getSingleOrder = async (id: string, user: JwtPayload) => {
   const order = await Order.findOne({ _id: id, user: user.userId }).populate([
     { path: 'user', select: '-__v' },
-    { path: 'product', select: '-__v' },
+    { path: 'items.product', select: '-__v' },
   ]);
   if (!order) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Order not found');
@@ -218,7 +218,7 @@ const updateOrderStatus = async (
     runValidators: true,
   }).populate([
     { path: 'user', select: '-__v' },
-    { path: 'product', select: '-__v' },
+    { path: 'items.product', select: '-__v' },
   ]);
 
   return result;
