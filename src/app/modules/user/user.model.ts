@@ -28,6 +28,10 @@ const userSchema = new Schema<TUser>(
       type: Boolean,
       default: true,
     },
+    profileImage: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

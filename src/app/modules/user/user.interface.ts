@@ -9,6 +9,7 @@ export type TUser = {
   password: string;
   role: TUserRole;
   isActive: boolean;
+  profileImage?: string;
   passwordChangedAt?: Date;
 };
 

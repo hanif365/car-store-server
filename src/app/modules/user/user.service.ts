@@ -6,6 +6,24 @@ import { TUser, TChangePassword } from './user.interface';
 import { AppError } from '../../errors/AppError';
 import config from '../../config';
 
+const getAllUsers = async () => {
+  const users = await User.find({});
+  return users;
+};
+
+const updateUser = async (id: string, payload: Partial<TUser>) => {
+  const user = await User.findOne({ _id: id });
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+
+  const result = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
+
 const updateUserStatus = async (id: string, payload: { isActive: boolean }) => {
   const user = await User.findById(id);
   if (!user) {
@@ -68,20 +86,13 @@ const changePassword = async (user: JwtPayload, payload: TChangePassword) => {
 };
 
 const updateProfile = async (user: JwtPayload, payload: Partial<TUser>) => {
-  const { name, email } = payload;
-
-  if (email) {
-    const existingUser = await User.findOne({ email });
-    if (existingUser && existingUser._id.toString() !== user.userId) {
-      throw new AppError(StatusCodes.CONFLICT, 'Email already exists');
-    }
-  }
+  const { name, profileImage } = payload;
 
   const result = await User.findByIdAndUpdate(
     user.userId,
     {
       name,
-      email,
+      profileImage,
     },
     {
       new: true,
@@ -92,8 +103,19 @@ const updateProfile = async (user: JwtPayload, payload: Partial<TUser>) => {
   return result;
 };
 
+const getMyProfile = async (user: JwtPayload) => {
+  const result = await User.findById(user.userId);
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+  return result;
+};
+
 export const UserService = {
+  getAllUsers,
+  updateUser,
   updateUserStatus,
   changePassword,
   updateProfile,
+  getMyProfile,
 };

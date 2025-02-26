@@ -30,4 +30,24 @@ router.patch(
   UserController.updateProfile,
 );
 
+// Protected admin-only routes
+router.get(
+  '/',
+  auth(USER_ROLE.ADMIN),
+  UserController.getAllUsers,
+);
+
+router.patch(
+  '/:id',
+  auth(USER_ROLE.ADMIN),
+  validateRequest(UserValidation.updateUserValidationSchema),
+  UserController.updateUser,
+);
+
+router.get(
+  '/my-profile',
+  auth(USER_ROLE.ADMIN, USER_ROLE.USER),
+  UserController.getMyProfile
+);
+
 export default router; 
