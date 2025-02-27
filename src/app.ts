@@ -14,7 +14,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'https://car-store-client-ten.vercel.app'],
+    origin: ['https://car-store-client-ten.vercel.app'],
     credentials: true,
   }),
 );
@@ -24,7 +24,8 @@ app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     message: 'Welcome to our Car Store Server API',
     version: '1.0.0',
-    API_documentation: 'https://documenter.getpostman.com/view/31322920/2sAYdfrXUP',
+    API_documentation:
+      'https://documenter.getpostman.com/view/31322920/2sAYdfrXUP',
     success: true,
   });
 });

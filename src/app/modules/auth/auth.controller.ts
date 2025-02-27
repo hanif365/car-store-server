@@ -50,7 +50,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
   await AuthService.logoutUser();
 
-  console.log('Logout successful');
+  // console.log('Logout successful');
 
   // Clear refresh token cookie
   const cookieOptions = {

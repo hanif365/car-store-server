@@ -22,7 +22,7 @@ const auth = (...requiredRoles) => {
     return (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         // Check authorization header exists or not
         const token = req.headers.authorization;
-        console.log("token from auth middleware", token);
+        // console.log("token from auth middleware", token);
         if (!token) {
             throw new AppError_1.AppError(http_status_codes_1.StatusCodes.UNAUTHORIZED, 'Unauthorized Access');
         }

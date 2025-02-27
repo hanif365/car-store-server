@@ -54,7 +54,7 @@ const refreshToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
 }));
 const logoutUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     yield auth_service_1.AuthService.logoutUser();
-    console.log('Logout successful');
+    // console.log('Logout successful');
     // Clear refresh token cookie
     const cookieOptions = {
         httpOnly: true,
