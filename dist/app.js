@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
     res.status(200).json({
         message: 'Welcome to our Car Store Server API',
         version: '1.0.0',
-        API_documentation: '',
+        API_documentation: 'https://documenter.getpostman.com/view/31322920/2sAYdfrXUP',
         success: true,
     });
 });
