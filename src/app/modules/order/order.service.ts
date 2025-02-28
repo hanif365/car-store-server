@@ -9,9 +9,14 @@ import { TOrderItem } from './order.interface';
 import User from '../user/user.model';
 import { orderUtils } from './order.utils';
 
-const createOrder = async (
-  payload: { items: TOrderItem[]; user: JwtPayload; client_ip: string; address: string; contactNo: string; city: string; },
-) => {
+const createOrder = async (payload: {
+  items: TOrderItem[];
+  user: JwtPayload;
+  client_ip: string;
+  address: string;
+  contactNo: string;
+  city: string;
+}) => {
   if (!payload.user || !payload.user.userId) {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
   }
@@ -35,7 +40,10 @@ const createOrder = async (
       }
 
       if (product.stock < item.quantity) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'Not enough stock available');
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          'Not enough stock available',
+        );
       }
 
       // Calculate total price for this item
@@ -50,17 +58,22 @@ const createOrder = async (
     }
 
     // Create order
-    const order = await Order.create([{
-      user: payload.user.userId,
-      items: payload.items,
-      totalPrice,
-      address: payload.address,
-      contactNo: payload.contactNo,
-      city: payload.city,
-      paymentStatus: 'Pending',
-      status: 'Pending',
-      transaction: {},
-    }], { session });
+    const order = await Order.create(
+      [
+        {
+          user: payload.user.userId,
+          items: payload.items,
+          totalPrice,
+          address: payload.address,
+          contactNo: payload.contactNo,
+          city: payload.city,
+          paymentStatus: 'Pending',
+          status: 'Pending',
+          transaction: {},
+        },
+      ],
+      { session },
+    );
 
     // Prepare payment payload with user details
     const shurjopayPayload = {
