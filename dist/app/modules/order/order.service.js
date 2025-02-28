@@ -49,7 +49,8 @@ const createOrder = (payload) => __awaiter(void 0, void 0, void 0, function* () 
             yield product_model_1.default.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } }, { session, new: true });
         }
         // Create order
-        const order = yield order_model_1.default.create([{
+        const order = yield order_model_1.default.create([
+            {
                 user: payload.user.userId,
                 items: payload.items,
                 totalPrice,
@@ -59,7 +60,8 @@ const createOrder = (payload) => __awaiter(void 0, void 0, void 0, function* () 
                 paymentStatus: 'Pending',
                 status: 'Pending',
                 transaction: {},
-            }], { session });
+            },
+        ], { session });
         // Prepare payment payload with user details
         const shurjopayPayload = {
             amount: totalPrice,
