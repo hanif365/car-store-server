@@ -44,7 +44,10 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
 
   // Check if user is deactivated
   if (!user.isActive) {
-    throw new AppError(StatusCodes.FORBIDDEN, 'Your account has been deactivated');
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'Your account has been deactivated',
+    );
   }
 
   // Check password is correct or not
@@ -57,7 +60,7 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid credentials');
   }
 
-//   console.log(user);
+  //   console.log(user);
 
   const jwtPayload = {
     userId: user._id,
@@ -84,18 +87,23 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
   };
 };
 
-  const refreshToken = async (refreshToken: string) => {
-  const decoded = verifyToken(refreshToken, config.jwt_refresh_secret as string);
+const refreshToken = async (refreshToken: string) => {
+  const decoded = verifyToken(
+    refreshToken,
+    config.jwt_refresh_secret as string,
+  );
   const user = await User.findById(decoded.userId);
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
   }
 
-    // Check if user is deactivated
-    if (!user.isActive) {
-    throw new AppError(StatusCodes.FORBIDDEN, 'Your account has been deactivated');
+  // Check if user is deactivated
+  if (!user.isActive) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'Your account has been deactivated',
+    );
   }
-  
 
   const jwtPayload = {
     userId: user._id,
@@ -109,10 +117,10 @@ const loginUser = async (payload: TLoginUser): Promise<TLoginResponse> => {
     config.jwt_access_expires_in as string,
   );
 
-  console.log("sending new access token", accessToken);
+  console.log('sending new access token', accessToken);
 
-  return { accessToken }; 
-};  
+  return { accessToken };
+};
 
 const logoutUser = async (): Promise<TLogoutResponse> => {
   return {

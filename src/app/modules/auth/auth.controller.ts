@@ -40,7 +40,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
   const { accessToken } = await AuthService.refreshToken(refreshToken);
 
   sendResponse(res, {
-    statusCode: StatusCodes.OK,       
+    statusCode: StatusCodes.OK,
     success: true,
     message: 'Token refreshed successfully',
     data: { accessToken },

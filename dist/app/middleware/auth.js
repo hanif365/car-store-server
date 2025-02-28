@@ -22,7 +22,6 @@ const auth = (...requiredRoles) => {
     return (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         // Check authorization header exists or not
         const token = req.headers.authorization;
-        // console.log("token from auth middleware", token);
         if (!token) {
             throw new AppError_1.AppError(http_status_codes_1.StatusCodes.UNAUTHORIZED, 'Unauthorized Access');
         }
@@ -30,7 +29,6 @@ const auth = (...requiredRoles) => {
         const decoded = jsonwebtoken_1.default.verify(token.split(' ')[1], config_1.default.jwt_access_secret);
         // Check user exists or not
         const user = yield user_model_1.default.findById(decoded.userId);
-        // console.log('user', user);
         if (!user) {
             throw new AppError_1.AppError(http_status_codes_1.StatusCodes.NOT_FOUND, 'User not found');
         }
